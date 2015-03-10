@@ -42,7 +42,7 @@ def main(
         root = ".",
         max_depth = 0,
         min_size = 0,
-        size_type_list = SIZE,
+        is_human_readble = False,
         outbuf = sys.stdout,
         delimiter = "\t",
         end_of_line = "\n",
@@ -65,16 +65,23 @@ def main(
         if s < min_size:
             continue
 
-        s = float(s)
+        if is_human_readble:
+            size_type = SIZE[0]
+            str_s = str(s)
 
-        size_type = size_type_list[0]
-        for s_type in size_type_list[1:]:
-            if 1024 < s:
-                s /= 1024
-                size_type = s_type
-            else:
-                break
-        outbuf.write(delimiter.join([k, "%.2f"%(s), size_type]) + end_of_line)
+        else:
+            s = float(s)
+
+            size_type = SIZE[0]
+            for s_type in SIZE[1:]:
+                if 1024 < s:
+                    s /= 1024
+                    size_type = s_type
+                else:
+                    break
+            str_s = "%.2f" % (s)
+
+        outbuf.write(delimiter.join([k, str_s, size_type]) + end_of_line)
 
     for f in skip_files:
         outbuf.write(delimiter.join(["Skipped:", f]) + end_of_line)
@@ -152,7 +159,7 @@ def arg_parse(argv):
             'root' : args.input_dir_path,
             'max_depth' : args.max_depth,
             'min_size' : min_size,
-            'size_type_list' : size_type_list,
+            'is_human_readble' : args.human_readble,
             'outbuf' : outbuf,
             'delimiter' : args.delimiter,
             'end_of_line' : args.end_of_line,

@@ -67,11 +67,11 @@ class MyFileDropTarget(wx.FileDropTarget):
             th.start()
         """
         for file in filenames:
-            self.window.text.SetValue(file)
             if os.path.isdir(file):
                 root = file
             else:
                 root = os.path.dirname(file)
+            self.window.text.SetValue(root)
             main_arg = {
                     'root' : root,
                     'human_readble' : False,

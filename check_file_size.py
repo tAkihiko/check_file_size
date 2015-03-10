@@ -84,50 +84,50 @@ def arg_parse(argv):
     parser.add_argument(
             '--help',
             action = 'help',
-            help='help',
+            help='このヘルプを表示',
             )
     parser.add_argument(
             '--input-dir-path', '-i',
             metavar='ROOT_PATH',
             default='.',
-            help='root dir',
+            help='ファイルサイズを調査したいディレクトリパス',
             )
     parser.add_argument(
             '--max-depth', '-d',
             metavar='N',
             type=int, default=0,
-            help='view depth'
+            help='表示するディレクトリの深さ'
             )
     parser.add_argument(
             '--min-size', '-s',
             metavar='N',
             type=int, default=0,
-            help='min size'
+            help='表示するディレクトリの最小サイズ'
             )
     parser.add_argument(
             '--min-size-type', '-t',
             default=SIZE[0], choices=SIZE,
-            help='min size type'
+            help='表示するディレクトリの最小サイズの単位'
             )
     parser.add_argument(
             '--human-readble', '-h',
             action = 'store_true',
-            help='view human readble size'
+            help='単位を読み取りやすく変更'
             )
     parser.add_argument(
             '--output_file', '-o',
             type=argparse.FileType("w", 0), default='-',
-            help='output'
+            help='出力バッファ'
             )
     parser.add_argument(
             '--delimiter',
             default="\t",
-            help='delimiter (def:%(default)s)'
+            help='区切り文字'
             )
     parser.add_argument(
             '--end-of-line',
             default="\n",
-            help='end-of-line'
+            help='行末記号'
             )
 
     args = parser.parse_args(argv)

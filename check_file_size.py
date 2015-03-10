@@ -42,7 +42,7 @@ def main(
         root = ".",
         max_depth = 0,
         min_size = 0,
-        is_human_readble = False,
+        human_readble = False,
         outbuf = sys.stdout,
         delimiter = "\t",
         end_of_line = "\n",
@@ -65,7 +65,7 @@ def main(
         if s < min_size:
             continue
 
-        if is_human_readble:
+        if not human_readble:
             size_type = SIZE[0]
             str_s = str(s)
 
@@ -148,18 +148,13 @@ def arg_parse(argv):
             break
         min_size *= 1024
 
-    if args.human_readble:
-        size_type_list = SIZE
-    else:
-        size_type_list = SIZE[:1]
-
     outbuf = args.output_file
 
     return {
             'root' : args.input_dir_path,
             'max_depth' : args.max_depth,
             'min_size' : min_size,
-            'is_human_readble' : args.human_readble,
+            'human_readble' : args.human_readble,
             'outbuf' : outbuf,
             'delimiter' : args.delimiter,
             'end_of_line' : args.end_of_line,

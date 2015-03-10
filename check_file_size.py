@@ -3,8 +3,11 @@ import os
 import glob
 import argparse
 import sys
+import threading
 
 SIZE = [ "Byte", "KB", "MB", "GB", "TB", "PB", ]
+
+__main_write_lock = threading.Lock()
 
 def check_file_size(root = '.'):
 
@@ -51,40 +54,41 @@ def main(
 
     size_dir, skip_files = check_file_size(root)
 
-    keys = sorted(size_dir.keys())
-    for k in keys:
+    with __main_write_lock:
+        keys = sorted(size_dir.keys())
+        for k in keys:
 
-        # depth check
-        dirs_depth = k.split(os.path.sep)
-        depth = len(dirs_depth)
-        if 0 < max_depth and max_depth < depth:
-            continue
+            # depth check
+            dirs_depth = k.split(os.path.sep)
+            depth = len(dirs_depth)
+            if 0 < max_depth and max_depth < depth:
+                continue
 
-        # size check
-        s = size_dir[k]
-        if s < min_size:
-            continue
+            # size check
+            s = size_dir[k]
+            if s < min_size:
+                continue
 
-        if not human_readble:
-            size_type = SIZE[0]
-            str_s = str(s)
+            if not human_readble:
+                size_type = SIZE[0]
+                str_s = str(s)
 
-        else:
-            s = float(s)
+            else:
+                s = float(s)
 
-            size_type = SIZE[0]
-            for s_type in SIZE[1:]:
-                if 1024 < s:
-                    s /= 1024
-                    size_type = s_type
-                else:
-                    break
-            str_s = "%.2f" % (s)
+                size_type = SIZE[0]
+                for s_type in SIZE[1:]:
+                    if 1024 < s:
+                        s /= 1024
+                        size_type = s_type
+                    else:
+                        break
+                str_s = "%.2f" % (s)
 
-        outbuf.write(delimiter.join([k, str_s, size_type]) + end_of_line)
+            outbuf.write(delimiter.join([k, str_s, size_type]) + end_of_line)
 
-    for f in skip_files:
-        outbuf.write(delimiter.join(["Skipped:", f]) + end_of_line)
+        for f in skip_files:
+            outbuf.write(delimiter.join(["Skipped:", f]) + end_of_line)
 
 def arg_parse(argv):
     parser = argparse.ArgumentParser(add_help=False)

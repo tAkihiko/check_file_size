@@ -40,19 +40,6 @@ class MyThreadKanshi(threading.Thread):
             self.window.status.SetValue(u"未処理")
             self.window.drop_ctrl_event.clear()
 
-class MyThread(threading.Thread):
-    def __init__(self, window, **argk):
-        threading.Thread.__init__(self)
-        self.argk = argk
-        self.window = window
-
-    def run(self):
-        with self.window.status_update_lock:
-            self.window.status.SetValue(u"処理中")
-        check_file_size.main(**self.argk)
-        with self.window.status_update_lock:
-            self.window.status.SetValue(" ".join(map(str,threading.enumerate())))
-
 class MyFileDropTarget(wx.FileDropTarget):
     def __init__(self, window):
         wx.FileDropTarget.__init__(self)

@@ -52,24 +52,6 @@ class MyFileDropTarget(wx.FileDropTarget):
             self.window.drop_ctrl_event.set()
             th = MyThreadKanshi(self.window, filenames)
             th.start()
-        """
-        for file in filenames:
-            if os.path.isdir(file):
-                root = file
-            else:
-                root = os.path.dirname(file)
-            self.window.text.SetValue(root)
-            main_arg = {
-                    'root' : root,
-                    'human_readble' : False,
-                    'outbuf' : self.window.result_text,
-                    }
-            #thread.start_new_thread(check_file_size.main, (root, 0, 0, False, self.window.result_text))
-            #self.window.thread.run(**main_arg)
-            thread = MyThread(self.window, **main_arg)
-            thread.start()
-            #check_file_size.main(root = root, outbuf=self.window.result_text)
-        #"""
 
 class MyFrame(wx.Frame):
 

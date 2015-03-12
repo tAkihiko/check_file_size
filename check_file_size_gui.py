@@ -16,6 +16,11 @@ class MyThreadKanshi(threading.Thread):
         self.filenames = filenames
         self.t_list = []
 
+    def proc(self, root):
+        size_dir, skip_files = check_file_size.check_file_size(root=root)
+        with self.window.result_list_write_lock:
+            self.window.result_list.append((root, size_dir, skip_files))
+
     def run(self):
         with self.window.status_update_lock:
             self.window.status.SetValue(u"処理中")
@@ -25,18 +30,20 @@ class MyThreadKanshi(threading.Thread):
             else:
                 root = os.path.dirname(f)
             self.window.text.SetValue(root)
-            main_arg = {
-                    'root' : root,
-                    'human_readble' : False,
-                    'outbuf' : self.window.result_text,
-                    }
-            thread = threading.Thread(target=check_file_size.main, kwargs=(main_arg))
+            thread = threading.Thread(target=MyThreadKanshi.proc, args=(self, root))
             self.t_list.append(thread)
             thread.start()
         for t in self.t_list:
             t.join()
         with self.window.status_update_lock:
-            #self.window.status.SetValue(" ".join(map(str,threading.enumerate())))
+
+            # TODO: パネル側の処理にする
+            for root, size_dir, skip_files in self.window.result_list[:]:
+                self.window.result_text.write(root + "\n")
+                for key in sorted(size_dir.keys()):
+                    self.window.result_text.write("\t".join([key, str(size_dir[key])]) + "\n")
+                self.window.result_text.write("\n")
+
             self.window.status.SetValue(u"未処理")
             self.window.drop_ctrl_event.clear()
 
@@ -73,6 +80,8 @@ class MyFrame(wx.Frame):
         self.status = wx.TextCtrl(root_pane, -1, u"未処理")
         self.status_update_lock = threading.Lock()
         # 3段目
+        self.result_list = []
+        self.result_list_write_lock = threading.Lock()
         self.result_text = wx.TextCtrl(root_pane, -1, "", style=wx.TE_MULTILINE)
 
         # 縦組み

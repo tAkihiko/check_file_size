@@ -36,13 +36,11 @@ class MyThreadKanshi(threading.Thread):
             t.join()
         with self.window.status_update_lock:
 
-            # TODO: パネル側の処理にする
+            root_list = []
             for root, size_dir, skip_files in self.window.result_list[:]:
-                self.window.result_text.write(root + "\n")
-                for key in sorted(size_dir.keys()):
-                    self.window.result_text.write("\t".join([key, str(size_dir[key])]) + "\n")
-                self.window.result_text.write("\n")
+                root_list.append(root)
 
+            self.window.file_list.SetItems(root_list)
             self.window.status.SetValue(u"未処理")
             self.window.drop_ctrl_event.clear()
 
@@ -68,30 +66,49 @@ class MyFrame(wx.Frame):
 
         layout = wx.BoxSizer(wx.VERTICAL)
 
-        # 1段目
-        sizer = wx.BoxSizer(wx.HORIZONTAL)
-        label = wx.StaticText(root_pane, -1, u"File name:")
-        self.text = wx.TextCtrl(root_pane, -1, "", size=(400,-1))
-        sizer.Add(label, 0, wx.ALL, 5)
-        sizer.Add(self.text, 0, wx.ALL | wx.GROW, 5)
-
-        # 2段目
-        self.status = wx.TextCtrl(root_pane, -1, u"未処理")
-        self.status_update_lock = threading.Lock()
-        # 3段目
         self.result_list = []
         self.result_list_write_lock = threading.Lock()
+
+        # 1段目
+        sizer_1 = wx.BoxSizer(wx.HORIZONTAL)
+        label = wx.StaticText(root_pane, -1, u"File name:")
+        self.text = wx.TextCtrl(root_pane, -1, "", size=(400,-1))
+        sizer_1.Add(label, 0, wx.ALL, 5)
+        sizer_1.Add(self.text, 0, wx.ALL | wx.GROW, 5)
+
+        # 2段目
+        sizer_2 = wx.BoxSizer(wx.HORIZONTAL)
+        self.status_update_lock = threading.Lock()
+        self.status = wx.TextCtrl(root_pane, -1, u"未処理")
+        self.file_list = wx.ComboBox(root_pane, wx.ID_ANY, style=wx.CB_DROPDOWN)
+        self.file_list.Bind(wx.EVT_COMBOBOX, self.OnComboBoxSelect)
+        sizer_2.Add(self.status, 0, wx.ALL, 5)
+        sizer_2.Add(self.file_list, 0, wx.ALL, 5)
+
+        # 3段目
+        self.result_text_update_lock = threading.Lock()
         self.result_text = wx.TextCtrl(root_pane, -1, "", style=wx.TE_MULTILINE)
 
         # 縦組み
-        layout.Add(sizer, 0, wx.ALL, 5)
-        layout.Add(self.status, 0, wx.ALL, 5)
+        layout.Add(sizer_1, 0, wx.ALL, 5)
+        layout.Add(sizer_2, 0, wx.ALL, 5)
         layout.Add(self.result_text, 1, wx.ALL | wx.GROW, 5)
         root_pane.SetSizer(layout)
 
         # ファイルドロップの設定
         dt = MyFileDropTarget(self)  #対象はこのフレーム全体
         self.SetDropTarget(dt)
+
+    def OnComboBoxSelect(self, event):
+        selected = self.file_list.GetValue()
+        with self.result_text_update_lock:
+            for root, size_dir, skip_files in self.result_list[:]:
+                if root != selected:
+                    continue
+                self.result_text.write(root + "\n")
+                for key in sorted(size_dir.keys()):
+                    self.result_text.write("\t".join([key, str(size_dir[key])]) + "\n")
+                self.result_text.write("\n")
 
 if __name__ == '__main__':
     app = wx.PySimpleApp()

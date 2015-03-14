@@ -2,7 +2,6 @@
 
 import wx
 import os
-import thread
 import threading
 
 import check_file_size
